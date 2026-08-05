@@ -1,114 +1,58 @@
-\# Software Requirements Specification (SRS)
+# Software Requirements Specification (SRS)
 
+# Project Name
+**AccessTracker**
+**Version:** 0.2 (MVP Design)
+**Author:*** Jyothi Basu
 
+---
 
-\# Project Name
-
-
-
-\*\*AccessTracker\*\*
-
-
-
-\*\*Version:\*\* 0.2 (MVP Design)
-
-
-
-\*\*Author:\*\* Jyothi Basu
-
-
-
-\---
-
-
-
-\# 1. Project Overview
-
-
-
+# 1. Project Overview
 AccessTracker is a community-driven platform that enables users to report, discover, and track accessibility issues in software applications.
-
-
 
 The platform aims to provide a centralized knowledge base specifically for accessibility-related issues instead of mixing them with general bug reports found in application stores.
 
-
-
 The first version focuses on delivering a complete Minimum Viable Product (MVP). The architecture is intentionally designed to support future expansion, including developer collaboration, notifications, analytics, and additional features.
 
+---
 
-
-\---
-
-
-
-\# 2. Problem Statement
-
-
+# 2. Problem Statement
 
 Current application stores such as Google Play and Microsoft Store allow users to report problems through reviews. However:
-
-
-
-\* Accessibility issues are mixed with thousands of unrelated reviews.
-
-\* Users cannot easily determine whether an application is accessible before installing it.
-
-\* Accessibility issues are difficult for developers to discover and prioritize.
-
-\* There is no centralized accessibility knowledge base across applications.
-
-
-
+* Accessibility issues are mixed with thousands of unrelated reviews.
+* Users cannot easily determine whether an application is accessible before installing it.
+* Accessibility issues are difficult for developers to discover and prioritize.
+* There is no centralized accessibility knowledge base across applications.
 AccessTracker attempts to solve this problem by focusing exclusively on accessibility.
 
+---
 
+# 3. Objectives
 
-\---
+* Allow users to report accessibility issues.
+* Allow users to search accessibility reports before installing an application.
+* Allow community members to verify whether issues still exist.
+* Preserve accessibility knowledge across application versions.
+* Build a scalable architecture that supports future expansion.
 
+---
 
+# 4. Target Users
 
-\# 3. Objectives
-
-
-
-\* Allow users to report accessibility issues.
-
-\* Allow users to search accessibility reports before installing an application.
-
-\* Allow community members to verify whether issues still exist.
-
-\* Preserve accessibility knowledge across application versions.
-
-\* Build a scalable architecture that supports future expansion.
-
-
-
-\---
-
-
-
-\# 4. Target Users
-
-
-
-\## Guest
-
-
-
+## Guest
 Can:
 
 
 
-\* Browse applications.
+* Browse applications.
 
-\* Browse accessibility reports.
+* Browse accessibility reports.
 
-\* View community verifications.
+* View community verifications.
 
-\* Search applications.
+* Search applications.
 
-\* Search reports.
+* Search reports.
 
 
 
@@ -116,45 +60,17 @@ Cannot:
 
 
 
-\* Report issues.
+* Report issues.
 
-\* Submit verifications.
-
-
-
-\---
+* Submit verifications.
 
 
 
-\## Registered User
+---
 
 
 
-Can:
-
-
-
-\* Register.
-
-\* Login.
-
-\* Report accessibility issues.
-
-\* Edit/Delete own reports.
-
-\* Submit community verifications.
-
-\* Search applications.
-
-\* Search reports.
-
-
-
-\---
-
-
-
-\## Administrator
+## Registered User
 
 
 
@@ -162,29 +78,57 @@ Can:
 
 
 
-\* Manage users.
+* Register.
 
-\* Delete inappropriate reports.
+* Login.
 
-\* Delete applications.
+* Report accessibility issues.
 
-\* Manage community verifications.
+* Edit/Delete own reports.
 
+* Submit community verifications.
 
+* Search applications.
 
-\---
-
-
-
-\# 5. Planned Roles
+* Search reports.
 
 
 
-\## Developer (Future Version)
+---
 
 
 
-The developer role exists in the system design but is \*\*not implemented in Version 1\*\*.
+## Administrator
+
+
+
+Can:
+
+
+
+* Manage users.
+
+* Delete inappropriate reports.
+
+* Delete applications.
+
+* Manage community verifications.
+
+
+
+---
+
+
+
+# 5. Planned Roles
+
+
+
+## Developer (Future Version)
+
+
+
+The developer role exists in the system design but is **not implemented in Version 1**.
 
 
 
@@ -192,127 +136,127 @@ Future responsibilities include:
 
 
 
-\* Claim applications.
+* Claim applications.
 
-\* Respond to reports.
+* Respond to reports.
 
-\* Update issue status.
+* Update issue status.
 
-\* Publish accessibility fixes.
+* Publish accessibility fixes.
 
 
 
-\---
+---
 
 
 
-\# 6. Technology Stack
+# 6. Technology Stack
 
 
 
-\## Backend
+## Backend
 
 
 
-\* Python
+* Python
 
-\* FastAPI
+* FastAPI
 
 
 
-\## Database
+## Database
 
 
 
-\* MongoDB
+* MongoDB
 
 
 
-\## Optional
+## Optional
 
 
 
-\* Redis (Future Version)
+* Redis (Future Version)
 
 
 
-\## Security
+## Security
 
 
 
-\* Argon2id Password Hashing
+* Argon2id Password Hashing
 
-\* JWT Authentication
+* JWT Authentication
 
-\* Access Token (30 minutes)
+* Access Token (30 minutes)
 
-\* Refresh Token (7 days)
+* Refresh Token (7 days)
 
 
 
-\## Frontend
+## Frontend
 
 
 
-\* Flutter
+* Flutter
 
 
 
-\---
+---
 
 
 
-\# 7. Project Scope
+# 7. Project Scope
 
 
 
-\## Included in MVP
+## Included in MVP
 
 
 
-\* JWT Authentication
+* JWT Authentication
 
-\* Refresh Tokens
+* Refresh Tokens
 
-\* Guest/User/Admin roles
+* Guest/User/Admin roles
 
-\* Applications
+* Applications
 
-\* Accessibility Reports
+* Accessibility Reports
 
-\* Community Verification
+* Community Verification
 
-\* Search
+* Search
 
-\* Administration
+* Administration
 
 
 
-\## Excluded from MVP
+## Excluded from MVP
 
 
 
-\* Developer workflow
+* Developer workflow
 
-\* Google Sign-In
+* Google Sign-In
 
-\* Email verification
+* Email verification
 
-\* Notifications
+* Notifications
 
-\* Redis integration
+* Redis integration
 
-\* File uploads
+* File uploads
 
-\* Accessibility score
+* Accessibility score
 
 
 
-\---
+---
 
 
 
-\# 8. Proposed Architecture
+# 8. Proposed Architecture
 
 
 
@@ -352,11 +296,11 @@ MongoDB
 
 
 
-\---
+---
 
 
 
-\# 9. Backend Structure
+# 9. Backend Structure
 
 
 
@@ -412,11 +356,11 @@ app/
 
 
 
-\---
+---
 
 
 
-\# 10. Frontend Structure
+# 10. Frontend Structure
 
 
 
@@ -464,15 +408,15 @@ frontend/
 
 
 
-\---
+---
 
 
 
-\# 11. Collections
+# 11. Collections
 
 
 
-\## Users
+## Users
 
 
 
@@ -480,11 +424,11 @@ Stores:
 
 
 
-\* User information
+* User information
 
-\* Authentication
+* Authentication
 
-\* Roles
+* Roles
 
 
 
@@ -492,19 +436,19 @@ Roles:
 
 
 
-\* User
+* User
 
-\* Developer (Reserved for future implementation)
+* Developer (Reserved for future implementation)
 
-\* Admin
-
-
-
-\---
+* Admin
 
 
 
-\## Applications
+---
+
+
+
+## Applications
 
 
 
@@ -512,11 +456,11 @@ Stores:
 
 
 
-\* Application Name
+* Application Name
 
-\* Platform
+* Platform
 
-\* Description
+* Description
 
 
 
@@ -524,9 +468,9 @@ Applications are uniquely identified by:
 
 
 
-\* Application Name
+* Application Name
 
-\* Platform
+* Platform
 
 
 
@@ -534,77 +478,11 @@ This allows the same application to exist on multiple platforms (Android, Window
 
 
 
-\---
+---
 
 
 
-\## Bugs
-
-
-
-Stores:
-
-
-
-\* Title
-
-\* Description
-
-\* Application ID
-
-\* Reporter ID
-
-\* Application Version
-
-\* Category
-
-\* Severity
-
-\* Created Date
-
-
-
-\### Categories
-
-
-
-\* Screen Reader
-
-\* Keyboard Navigation
-
-\* Focus Management
-
-\* Forms
-
-\* Buttons
-
-\* Navigation
-
-\* Media
-
-\* Other
-
-
-
-\### Severity
-
-
-
-\* Low
-
-\* Medium
-
-\* High
-
-\* Critical
-
-
-
-\---
-
-
-
-\## Verifications
+## Bugs
 
 
 
@@ -612,15 +490,81 @@ Stores:
 
 
 
-\* Bug ID
+* Title
 
-\* User ID
+* Description
 
-\* Application Version
+* Application ID
 
-\* Status
+* Reporter ID
 
-\* Updated Timestamp
+* Application Version
+
+* Category
+
+* Severity
+
+* Created Date
+
+
+
+### Categories
+
+
+
+* Screen Reader
+
+* Keyboard Navigation
+
+* Focus Management
+
+* Forms
+
+* Buttons
+
+* Navigation
+
+* Media
+
+* Other
+
+
+
+### Severity
+
+
+
+* Low
+
+* Medium
+
+* High
+
+* Critical
+
+
+
+---
+
+
+
+## Verifications
+
+
+
+Stores:
+
+
+
+* Bug ID
+
+* User ID
+
+* Application Version
+
+* Status
+
+* Updated Timestamp
 
 
 
@@ -628,19 +572,19 @@ Rules:
 
 
 
-\* One verification per user per bug.
+* One verification per user per bug.
 
-\* A new verification replaces the user's previous verification.
+* A new verification replaces the user's previous verification.
 
-\* Verification history is not preserved in Version 1.
-
-
-
-\---
+* Verification history is not preserved in Version 1.
 
 
 
-\# 12. Community Verification
+---
+
+
+
+# 12. Community Verification
 
 
 
@@ -652,9 +596,9 @@ Possible states:
 
 
 
-\* Still Exists
+* Still Exists
 
-\* Fixed For Me
+* Fixed For Me
 
 
 
@@ -662,9 +606,9 @@ Each verification contains:
 
 
 
-\* Application Version
+* Application Version
 
-\* Timestamp
+* Timestamp
 
 
 
@@ -724,63 +668,63 @@ Version 3.6.0
 
 
 
-\---
+---
 
 
 
-\# 13. Planned MVP Features
+# 13. Planned MVP Features
 
 
 
-\## Authentication
+## Authentication
 
 
 
-\* Register
+* Register
 
-\* Login
+* Login
 
-\* JWT Authentication
+* JWT Authentication
 
-\* Refresh Token
-
-
-
-\## Applications
+* Refresh Token
 
 
 
-\* Browse applications
-
-\* Search applications
+## Applications
 
 
 
-\## Accessibility Reports
+* Browse applications
+
+* Search applications
 
 
 
-\* Create report
-
-\* Edit own report
-
-\* Delete own report
-
-\* View reports
+## Accessibility Reports
 
 
 
-\## Community Verification
+* Create report
+
+* Edit own report
+
+* Delete own report
+
+* View reports
 
 
 
-\* Still Exists
-
-\* Fixed For Me
+## Community Verification
 
 
 
-\## Search
+* Still Exists
+
+* Fixed For Me
+
+
+
+## Search
 
 
 
@@ -788,7 +732,7 @@ Applications
 
 
 
-\* Search by application name
+* Search by application name
 
 
 
@@ -796,121 +740,121 @@ Reports
 
 
 
-\* Search by title
+* Search by title
 
-\* Search by application
+* Search by application
 
-\* Search by category
+* Search by category
 
-\* Search by verification status
+* Search by verification status
 
 
 
-\## Administration
+## Administration
 
 
 
-\* Manage users
+* Manage users
 
-\* Delete inappropriate reports
+* Delete inappropriate reports
 
-\* Delete applications
+* Delete applications
 
 
 
-\---
+---
 
 
 
-\# 14. Planned Features (Architecture Exists)
+# 14. Planned Features (Architecture Exists)
 
 
 
-\* Developer Role
+* Developer Role
 
-\* Developer Verification
+* Developer Verification
 
-\* Developer Dashboard
+* Developer Dashboard
 
-\* Claim Application
+* Claim Application
 
-\* Developer Issue Workflow
+* Developer Issue Workflow
 
 
 
-\---
+---
 
 
 
-\# 15. Future Enhancements
+# 15. Future Enhancements
 
 
 
-\* Google Sign-In
+* Google Sign-In
 
-\* Email Verification
+* Email Verification
 
-\* Password Reset
+* Password Reset
 
-\* Notifications
+* Notifications
 
-\* Redis Integration
+* Redis Integration
 
-\* Accessibility Score
+* Accessibility Score
 
-\* Workarounds
+* Workarounds
 
-\* Analytics Dashboard
+* Analytics Dashboard
 
-\* Release Notes
+* Release Notes
 
-\* Docker Deployment
+* Docker Deployment
 
-\* File Uploads
+* File Uploads
 
 
 
-\---
+---
 
 
 
-\# 16. Authentication Design
+# 16. Authentication Design
 
 
 
-\## Password Hashing
+## Password Hashing
 
 
 
-\* Argon2id
+* Argon2id
 
 
 
-\## Authentication
+## Authentication
 
 
 
-\* JWT
+* JWT
 
 
 
-\## Access Token
+## Access Token
 
 
 
-\* Valid for 30 minutes.
+* Valid for 30 minutes.
 
 
 
-\## Refresh Token
+## Refresh Token
 
 
 
-\* Valid for 7 days.
+* Valid for 7 days.
 
 
 
-\## Password Policy
+## Password Policy
 
 
 
@@ -918,25 +862,25 @@ Minimum requirements:
 
 
 
-\* 8 characters
+* 8 characters
 
-\* One uppercase letter
+* One uppercase letter
 
-\* One lowercase letter
+* One lowercase letter
 
-\* One digit
-
-
-
-\---
+* One digit
 
 
 
-\# 17. Design Decisions
+---
 
 
 
-\## Why MongoDB?
+# 17. Design Decisions
+
+
+
+## Why MongoDB?
 
 
 
@@ -948,11 +892,11 @@ MongoDB allows flexible document structures without rigid relational schemas.
 
 
 
-\---
+---
 
 
 
-\## Why Community Verification?
+## Why Community Verification?
 
 
 
@@ -964,11 +908,11 @@ Community verification keeps reports useful by recording:
 
 
 
-\* Application version
+* Application version
 
-\* User observations
+* User observations
 
-\* Verification timestamp
+* Verification timestamp
 
 
 
@@ -976,11 +920,11 @@ instead of relying solely on developer updates.
 
 
 
-\---
+---
 
 
 
-\## Why No Comments?
+## Why No Comments?
 
 
 
@@ -996,11 +940,11 @@ Threaded discussions may be introduced in future versions if needed.
 
 
 
-\---
+---
 
 
 
-\## Why Not Only Google Play Reviews?
+## Why Not Only Google Play Reviews?
 
 
 
@@ -1012,11 +956,11 @@ AccessTracker focuses exclusively on accessibility, creating a searchable knowle
 
 
 
-\---
+---
 
 
 
-\# 18. Long-Term Vision
+# 18. Long-Term Vision
 
 
 
@@ -1024,23 +968,23 @@ AccessTracker should evolve from a simple issue reporting platform into a collab
 
 
 
-\* Users report issues.
+* Users report issues.
 
-\* Community members verify issues.
+* Community members verify issues.
 
-\* Developers collaborate directly with users.
+* Developers collaborate directly with users.
 
-\* Accessibility knowledge is preserved across application versions.
+* Accessibility knowledge is preserved across application versions.
 
-\* Applications gradually improve through community feedback.
-
-
-
-\---
+* Applications gradually improve through community feedback.
 
 
 
-\# 19. Current Scope
+---
+
+
+
+# 19. Current Scope
 
 
 
