@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pymongo
+pydantic-settings
+argon2-cffi
+PyJWT
+email-validator
+redis
+resend
