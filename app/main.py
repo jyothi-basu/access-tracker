@@ -3,15 +3,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.applications.routes import router as applications_router
 from app.auth.routes import router as auth_router
 from app.core.database import get_database, init_database_indexes
+
+API_PREFIX = "/api/v1"
 
 
 def create_app() -> FastAPI:
     """Create and configure the AccessTracker API application."""
     app = FastAPI(title="AccessTracker API", version="0.1.0")
 
-    # Add CORS middleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -20,7 +22,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
+    app.include_router(auth_router, prefix=f"{API_PREFIX}/auth", tags=["auth"])
+    app.include_router(applications_router, prefix=f"{API_PREFIX}/applications", tags=["applications"])
 
     @app.on_event("startup")
     def startup_event() -> None:

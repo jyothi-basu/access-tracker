@@ -21,14 +21,46 @@ def get_database() -> Database:
     settings = get_settings()
     return get_mongo_client()[settings.mongo_db_name]
 
-
 def init_database_indexes(db: Database) -> None:
-    """Create unique and query-supporting indexes required by authentication."""
+    """Create MongoDB indexes required by AccessTracker."""
+
     users = db["users"]
     sessions = db["sessions"]
+    applications = db["applications"]
 
-    users.create_index([("email", ASCENDING)], unique=True, name="uq_users_email")
-    sessions.create_index([("refresh_jti", ASCENDING)], unique=True, name="uq_sessions_refresh_jti")
-    sessions.create_index([("user_id", ASCENDING)], name="ix_sessions_user_id")
-    sessions.create_index([("expires_at", ASCENDING)], name="ix_sessions_expires_at")
-    sessions.create_index([("revoked_at", ASCENDING)], name="ix_sessions_revoked_at")
+    # Authentication indexes
+    users.create_index(
+        [("email", ASCENDING)],
+        unique=True,
+        name="uq_users_email",
+    )
+
+    sessions.create_index(
+        [("refresh_jti", ASCENDING)],
+        unique=True,
+        name="uq_sessions_refresh_jti",
+    )
+    sessions.create_index(
+        [("user_id", ASCENDING)],
+        name="ix_sessions_user_id",
+    )
+    sessions.create_index(
+        [("expires_at", ASCENDING)],
+        name="ix_sessions_expires_at",
+    )
+    sessions.create_index(
+        [("revoked_at", ASCENDING)],
+        name="ix_sessions_revoked_at",
+    )
+
+    # Applications indexes
+    applications.create_index(
+        [("normalized_name", ASCENDING), ("platform", ASCENDING)],
+        unique=True,
+        name="uq_applications_normalized_name_platform",
+    )
+
+    applications.create_index(
+        [("normalized_name", ASCENDING)],
+        name="ix_applications_normalized_name",
+    )
