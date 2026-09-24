@@ -65,6 +65,29 @@ class ApplicationService:
 
         return self._build_application_response(created_application)
 
+    def find_or_create_application(
+        self,
+        application_name: str,
+        platform: str,
+        created_by: ObjectId,
+    ) -> ApplicationResponse:
+        """Return an existing application or create a new one."""
+
+        normalized_name = self._normalize_application_name(application_name)
+
+        application = self.repository.get_application_by_normalized_name(
+            normalized_name
+        )
+
+        if application is not None:
+            return self._build_application_response(application)
+
+        return self.create_application(
+            application_name=application_name,
+            platform=platform,
+            created_by=created_by,
+        )
+
     def search_applications(
         self,
         search: str | None,
