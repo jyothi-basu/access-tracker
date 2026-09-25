@@ -28,6 +28,7 @@ def init_database_indexes(db: Database) -> None:
     sessions = db["sessions"]
     applications = db["applications"]
     bugs = db["bugs"]
+    verifications = db["verifications"]
 
     # Authentication indexes
     users.create_index(
@@ -74,3 +75,9 @@ def init_database_indexes(db: Database) -> None:
     bugs.create_index([("screen_reader", ASCENDING)], name="ix_bugs_screen_reader")
     bugs.create_index([("created_at", -1)], name="ix_bugs_created_at")
     bugs.create_index([("title", ASCENDING)], name="ix_bugs_title")
+
+    # Verifications indexes
+    verifications.create_index([("bug_id", ASCENDING), ("user_id", ASCENDING)], unique=True, name="uq_verifications_bug_user")
+    verifications.create_index([("bug_id", ASCENDING)], name="ix_verifications_bug_id")
+    verifications.create_index([("user_id", ASCENDING)], name="ix_verifications_user_id")
+    verifications.create_index([("verification_type", ASCENDING)], name="ix_verifications_type")

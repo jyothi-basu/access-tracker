@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.applications.routes import router as applications_router
 from app.auth.routes import router as auth_router
 from app.bugs.routes import router as bugs_router
+from app.verifications.routes import router as verifications_router
 from app.core.database import get_database, init_database_indexes
 
 API_PREFIX = "/api/v1"
@@ -26,6 +27,8 @@ def create_app() -> FastAPI:
     app.include_router(auth_router, prefix=f"{API_PREFIX}/auth", tags=["auth"])
     app.include_router(applications_router, prefix=f"{API_PREFIX}/applications", tags=["applications"])
     app.include_router(bugs_router, prefix=f"{API_PREFIX}/bugs", tags=["bugs"])
+    app.include_router(verifications_router, prefix=f"{API_PREFIX}", tags=["verifications"])
+
 
     @app.on_event("startup")
     def startup_event() -> None:
