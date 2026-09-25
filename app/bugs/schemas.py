@@ -89,6 +89,7 @@ class BugResponse(BaseModel):
     screen_reader_version: str | None = None
     device_model: str | None = None
 
+    reporter_username: str
     created_by: str
     created_at: datetime
     updated_at: datetime

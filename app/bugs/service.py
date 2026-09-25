@@ -85,6 +85,19 @@ class BugService:
                 detail="You can only modify your own bug reports.",
             )
 
+    def _get_username(self, user_id: ObjectId) -> str:
+        """Return the username for a user."""
+
+        user = self.users.find_one(
+            {"_id": user_id},
+            {"username": 1},
+        )
+
+        if user is None:
+            return "Unknown User"
+
+        return user["username"]
+
     def _build_bug_document(
         self,
         payload: CreateBugRequest,
@@ -121,6 +134,7 @@ class BugService:
 
         return BugResponse(
             _id=str(bug["_id"]),
+            reporter_username=self._get_username(bug["created_by"]),
             application_id=str(bug["application_id"]),
             application_name=application.display_name,
             platform=bug["platform"],
