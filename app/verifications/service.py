@@ -62,7 +62,7 @@ class VerificationService:
     def _get_username(self, user_id: ObjectId) -> str:
         """Return a user's username."""
 
-        user = self.users.find_one({"_id": user_id}, {"name": 1})
+        user = self.users.find_one({"_id": user_id}, {"username": 1})
 
         if user is None:
             return "Unknown User"

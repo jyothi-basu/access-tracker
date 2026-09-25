@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     password_hash_time_cost: int = 2
     password_hash_memory_cost: int = 102400
     password_hash_parallelism: int = 8
-
+    first_admin_email: str
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

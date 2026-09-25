@@ -41,7 +41,7 @@ class AuthService:
         """Convert a MongoDB user document into the public API representation."""
         return UserResponse(
             id=str(user["_id"]),
-            name=user["name"],
+            username=user["username"],
             email=user["email"],
             role=user["role"],
             is_email_verified=user.get("is_email_verified", False),
@@ -122,7 +122,7 @@ class AuthService:
         email = str(payload.email).lower()
         if self.repository.get_user_by_email(email) is None:
             data = {
-                "name": payload.name.strip(),
+                "username": payload.username.strip(),
                 "email": email,
                 "password_hash": hash_password(payload.password),
             }
@@ -130,7 +130,7 @@ class AuthService:
                 "register",
                 email,
                 data,
-                lambda otp: self.email_service.send_verification_otp(email, data["name"], otp),
+                lambda otp: self.email_service.send_verification_otp(email, data["username"], otp),
             )
         return {"detail": "If the email can be registered, a verification code has been sent."}
 
@@ -144,21 +144,28 @@ class AuthService:
             self._send_otp(
                 "register",
                 email,
-                {key: pending[key] for key in ("name", "email", "password_hash")},
-                lambda otp: self.email_service.send_verification_otp(email, pending["name"], otp),
+                {key: pending[key] for key in ("username", "email", "password_hash")},
+                lambda otp: self.email_service.send_verification_otp(email, pending["username"], otp),
             )
         return {"detail": "If the email can be registered, a verification code has been sent."}
 
     def verify_registration(self, email: str, otp: str) -> dict[str, str]:
         """Verify a registration OTP and create the verified MongoDB user."""
+
         email = email.lower()
         pending = self.otp_service.verify("register", email, otp)
+
         now = utc_now()
+
+        admin_email = self.settings.first_admin_email.strip().lower()
+
+        role = "admin" if email == admin_email else "user"
+
         user_doc = {
-            "name": pending["name"],
+            "username": pending["username"],
             "email": email,
             "password_hash": pending["password_hash"],
-            "role": "user",
+            "role": role,
             "is_active": True,
             "is_email_verified": True,
             "email_verified_at": now,
@@ -166,11 +173,17 @@ class AuthService:
             "created_at": now,
             "updated_at": now,
         }
+
         try:
             self.repository.create_user(user_doc)
         except DuplicateKeyError as exc:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists") from exc
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already exists",
+            ) from exc
+
         return {"detail": "Email verified successfully. Please log in."}
+
 
     def login(self, payload: LoginRequest, request: Request) -> AuthResponse:
         """Authenticate a verified, active user and create a login session."""
