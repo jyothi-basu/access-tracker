@@ -7,6 +7,7 @@ from app.applications.repository import ApplicationRepository
 from app.applications.schemas import (
     ApplicationResponse,
     CreateApplicationRequest,
+    Platform,
 )
 from app.utils.time import utc_now
 
