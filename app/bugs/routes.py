@@ -19,18 +19,20 @@ from app.core.dependencies import get_current_user_id
 
 router = APIRouter()
 
-
 def get_bug_service(
     db: Database = Depends(get_database),
 ) -> BugService:
-    """Build the bug service with request-scoped dependencies."""
+    """Create BugService with its dependencies."""
 
-    application_service = ApplicationService(ApplicationRepository(db))
     bug_repository = BugRepository(db)
+    application_repository = ApplicationRepository(db)
+
+    application_service = ApplicationService(application_repository)
 
     return BugService(
         bug_repository=bug_repository,
         application_service=application_service,
+        db=db,
     )
 
 

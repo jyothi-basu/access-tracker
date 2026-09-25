@@ -3,6 +3,7 @@
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException, status
+from pymongo.database import Database
 
 from app.applications.service import ApplicationService
 from app.bugs.repository import BugRepository
@@ -13,6 +14,7 @@ from app.bugs.schemas import (
     UpdateBugRequest,
 )
 from app.utils.time import utc_now
+from app.core.constants import ROLE_ADMIN
 
 
 class BugService:
@@ -22,9 +24,11 @@ class BugService:
         self,
         bug_repository: BugRepository,
         application_service: ApplicationService,
+        db: Database,
     ) -> None:
         self.repository = bug_repository
         self.application_service = application_service
+        self.users = db["users"]
 
     # ------------------------------------------------------------------
     # Helper methods
@@ -59,7 +63,21 @@ class BugService:
         bug: dict,
         current_user_id: ObjectId,
     ) -> None:
-        """Ensure only the creator can modify the bug."""
+        """Allow the bug owner or an admin to modify the bug."""
+
+        user = self.users.find_one(
+            {"_id": current_user_id},
+            {"role": 1},
+        )
+
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found.",
+            )
+
+        if user["role"] == ROLE_ADMIN:
+            return
 
         if bug["created_by"] != current_user_id:
             raise HTTPException(

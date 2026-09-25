@@ -11,6 +11,9 @@ from app.applications.schemas import (
 from app.applications.service import ApplicationService
 from app.core.database import get_database
 from app.core.dependencies import get_current_user_id
+from app.core.dependencies import require_roles
+from app.core.constants import ROLE_ADMIN
+
 
 router = APIRouter()
 
@@ -24,10 +27,10 @@ def get_application_service(
 @router.post("", response_model=ApplicationResponse)
 def create_application(
     payload: CreateApplicationRequest,
-    current_user_id: ObjectId = Depends(get_current_user_id),
+    current_user_id: ObjectId = Depends(require_roles(ROLE_ADMIN)),
     service: ApplicationService = Depends(get_application_service),
 ) -> ApplicationResponse:
-    """Create a new application or return an existing one."""
+    """Create a new application."""
     return service.create_application(payload, current_user_id)
 
 
