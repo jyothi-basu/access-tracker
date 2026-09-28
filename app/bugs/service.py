@@ -164,7 +164,7 @@ class BugService:
 
         application = self.application_service.find_or_create_application(
             application_name=payload.application_name,
-            platform=payload.platform.value,
+            platform=payload.platform,
             created_by=current_user_id,
         )
 

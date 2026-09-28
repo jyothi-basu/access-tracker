@@ -67,7 +67,7 @@ class VerificationService:
         if user is None:
             return "Unknown User"
 
-        return user["name"]
+        return user["username"]
 
     def _build_verification_response(
         self,
