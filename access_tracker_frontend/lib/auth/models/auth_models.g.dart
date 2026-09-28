@@ -8,14 +8,14 @@ part of 'auth_models.dart';
 
 RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) =>
     RegisterRequest(
-      name: json['name'] as String,
+      username: json['username'] as String,
       email: json['email'] as String,
       password: json['password'] as String,
     );
 
 Map<String, dynamic> _$RegisterRequestToJson(RegisterRequest instance) =>
     <String, dynamic>{
-      'name': instance.name,
+      'username': instance.username,
       'email': instance.email,
       'password': instance.password,
     };
@@ -74,7 +74,7 @@ Map<String, dynamic> _$TokenPairResponseToJson(TokenPairResponse instance) =>
 
 UserResponse _$UserResponseFromJson(Map<String, dynamic> json) => UserResponse(
       id: json['id'] as String,
-      name: json['name'] as String,
+      username: json['username'] as String,
       email: json['email'] as String,
       role: json['role'] as String,
       is_email_verified: json['is_email_verified'] as bool,
@@ -85,7 +85,7 @@ UserResponse _$UserResponseFromJson(Map<String, dynamic> json) => UserResponse(
 Map<String, dynamic> _$UserResponseToJson(UserResponse instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'name': instance.name,
+      'username': instance.username,
       'email': instance.email,
       'role': instance.role,
       'is_email_verified': instance.is_email_verified,

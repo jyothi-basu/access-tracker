@@ -4,11 +4,11 @@ part 'auth_models.g.dart';
 
 @JsonSerializable()
 class RegisterRequest {
-  final String name;
+  final String username;
   final String email;
   final String password;
 
-  RegisterRequest({required this.name, required this.email, required this.password});
+  RegisterRequest({required this.username, required this.email, required this.password});
 
   factory RegisterRequest.fromJson(Map<String, dynamic> json) => _$RegisterRequestFromJson(json);
   Map<String, dynamic> toJson() => _$RegisterRequestToJson(this);
@@ -69,7 +69,7 @@ class TokenPairResponse {
 @JsonSerializable()
 class UserResponse {
   final String id;
-  final String name;
+  final String username;
   final String email;
   final String role;
   final bool is_email_verified;
@@ -78,13 +78,16 @@ class UserResponse {
 
   UserResponse({
     required this.id,
-    required this.name,
+    required this.username,
     required this.email,
     required this.role,
     required this.is_email_verified,
     required this.created_at,
     required this.updated_at,
   });
+
+  /// Backward-compatible display alias used by existing profile widgets.
+  String get name => username;
 
   factory UserResponse.fromJson(Map<String, dynamic> json) => _$UserResponseFromJson(json);
   Map<String, dynamic> toJson() => _$UserResponseToJson(this);

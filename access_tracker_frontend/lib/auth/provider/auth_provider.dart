@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers.dart';
 import '../../core/network/api_error_handler.dart';
@@ -82,16 +83,62 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<bool> register(String name, String email, String password) async {
+  Future<bool> register(String username, String email, String password) async {
     state = state.copyWith(isLoading: true, clearErrorMessage: true);
     try {
-      await _authService.register(RegisterRequest(name: name, email: email, password: password));
+      await _authService.register(RegisterRequest(
+        username: username,
+        email: email,
+        password: password,
+      ));
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: ApiErrorHandler.handle(e));
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _registrationErrorMessage(e),
+      );
       return false;
     }
+  }
+
+  String _registrationErrorMessage(dynamic error) {
+    if (error is! DioException || error.response?.statusCode != 422) {
+      return ApiErrorHandler.handle(error);
+    }
+
+    final data = error.response?.data;
+    final detail = data is Map ? data['detail'] : null;
+
+    if (detail is String && detail.trim().isNotEmpty) {
+      return detail;
+    }
+
+    if (detail is List) {
+      final messages = <String>[];
+      for (final item in detail) {
+        if (item is! Map) continue;
+
+        final location = item['loc'];
+        final field = location is List && location.isNotEmpty
+            ? location.last.toString()
+            : null;
+        final message = switch (field) {
+          'username' => 'Please enter a username.',
+          'email' => 'Please enter a valid email address.',
+          'password' => 'Please enter a password.',
+          _ => item['msg']?.toString(),
+        };
+
+        if (message != null && message.trim().isNotEmpty && !messages.contains(message)) {
+          messages.add(message);
+        }
+      }
+
+      if (messages.isNotEmpty) return messages.join('\n\n');
+    }
+
+    return 'Invalid registration data.';
   }
 
   Future<bool> verifyRegistrationOtp(String email, String otp) async {

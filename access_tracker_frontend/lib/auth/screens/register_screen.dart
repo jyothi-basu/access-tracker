@@ -13,7 +13,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
-  final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -32,7 +32,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           child: Column(
             children: [
               if (authState.errorMessage != null) ErrorBanner(error: authState.errorMessage!),
-              TextFormField(controller: _nameController, decoration: const InputDecoration(labelText: "Full Name")),
+              TextFormField(controller: _usernameController, decoration: const InputDecoration(labelText: "Username")),
               const SizedBox(height: 16),
               TextFormField(controller: _emailController, decoration: const InputDecoration(labelText: "Email")),
               const SizedBox(height: 16),
@@ -44,7 +44,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final registered = await ref.read(authProvider.notifier).register(
-                      _nameController.text.trim(),
+                      _usernameController.text.trim(),
                       _emailController.text.trim(),
                       _passwordController.text,
                     );

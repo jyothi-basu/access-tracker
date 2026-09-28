@@ -17,14 +17,22 @@ class LandingPage extends StatelessWidget {
             const SizedBox(height: 16),
             const Text("Discover accessibility issues before installing an app, report new issues, and help the community verify whether accessibility problems still exist."),
             const SizedBox(height: 24),
-            PrimaryButton(onPressed: () {}, text: "Browse Applications", isFullWidth: true),
+            PrimaryButton(
+              onPressed: () => context.push('/bugs'),
+              text: "Browse Bug Reports",
+              isFullWidth: true,
+            ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: PrimaryButton(onPressed: () => context.push('/login'), text: "Login")),
-                const SizedBox(width: 16),
-                Expanded(child: OutlinedButton(onPressed: () => context.push('/register'), child: const Text("Create Account"))),
-              ],
+            PrimaryButton(
+              onPressed: () => context.push('/login'),
+              text: "Login",
+              isFullWidth: true,
+            ),
+            const SizedBox(height: 16),
+            PrimaryButton(
+              onPressed: () => context.push('/register'),
+              text: "Create Account",
+              isFullWidth: true,
             ),
             const SizedBox(height: 48),
             // Add feature cards and recent reports section placeholder
