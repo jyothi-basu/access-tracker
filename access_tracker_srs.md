@@ -2,8 +2,8 @@
 
 # Project Name
 **AccessTracker**
-**Version:** 0.3 (Backend-First MVP)
-**Author:*** Jyothi Basu
+**Version:** 0.4 (Implemented Backend-First MVP)
+**Author:** Jyothi Basu
 
 ---
 
@@ -108,13 +108,11 @@ Can:
 
 
 
-* Manage users.
+* Edit or delete bug reports through backend RBAC.
 
-* Delete inappropriate reports.
+* Perform future moderation and management operations when the admin dashboard is implemented.
 
-* Delete applications.
-
-* Manage community verifications.
+The current MVP does not include an administrator dashboard, user management UI, application management UI, or special administrator permissions for editing other users' verifications.
 
 
 
@@ -164,6 +162,10 @@ Future responsibilities include:
 
 * FastAPI
 
+* Pydantic
+
+* PyMongo
+
 
 
 ## Database
@@ -198,6 +200,8 @@ Future responsibilities include:
 
 * Refresh Token (7 days)
 
+* Purpose-specific OTP hashing and expiry limits
+
 
 
 ## Frontend
@@ -230,7 +234,7 @@ The initial release targets browser-based use only. Android, iOS, Windows, macOS
 
 * Password reset through email OTP
 
-* Guest/User/Admin roles
+* Guest, registered user, and limited administrator permissions
 
 * Applications
 
@@ -240,7 +244,11 @@ The initial release targets browser-based use only. Android, iOS, Windows, macOS
 
 * Search
 
-* Administration
+* My Bugs and My Verifications profile views
+
+* Owner edit and delete actions
+
+* Backend RBAC for administrator bug actions
 
 
 
@@ -257,6 +265,12 @@ The initial release targets browser-based use only. Android, iOS, Windows, macOS
 * File uploads
 
 * Accessibility score
+
+* Administrator dashboard and user management UI
+
+* Developer dashboard and developer workflow
+
+* Comments and discussions
 
 * Native mobile applications
 
@@ -336,15 +350,12 @@ app/
 
 &#x20;       email_service.py
 
-&#x20;   users/
-
 &#x20;   applications/
 
 &#x20;   bugs/
 
 &#x20;   verifications/
 
-&#x20;   admin/
 
 
 
@@ -390,19 +401,19 @@ access_tracker_frontend/
 
 
 
-&#x20;       screens/
+&#x20;       auth/
 
-&#x20;       services/
+&#x20;       applications/
 
-&#x20;       models/
+&#x20;       bugs/
 
-&#x20;       providers/
+&#x20;       verifications/
 
-&#x20;       widgets/
+&#x20;       home/
 
-&#x20;       constants/
+&#x20;       core/
 
-&#x20;       utils/
+&#x20;       shared/
 
 
 
@@ -438,6 +449,8 @@ Stores:
 
 * Roles
 
+The implemented user identity fields are `username`, `email`, and an Argon2 password hash. Email verification state and account timestamps are also stored.
+
 
 
 Roles:
@@ -464,11 +477,9 @@ Stores:
 
 
 
-* Application Name
+* Display Name
 
 * Platform
-
-* Description
 
 
 
@@ -476,7 +487,7 @@ Applications are uniquely identified by:
 
 
 
-* Application Name
+* Normalized Display Name
 
 * Platform
 
@@ -500,39 +511,43 @@ Stores:
 
 * Title
 
-* Description
+* Actual Behavior
+
+* Expected Behavior
+
+* Optional Steps to Reproduce
 
 * Application ID
 
-* Reporter ID
+* Creator User ID
 
 * Application Version
 
-* Category
+* Screen Reader
 
 * Severity
 
-* Created Date
+* Optional Device Model
+
+* Created and Updated Timestamps
 
 
 
-### Categories
+### Screen Readers
 
 
 
-* Screen Reader
+* NVDA
 
-* Keyboard Navigation
+* TalkBack
 
-* Focus Management
+* VoiceOver
 
-* Forms
+* JAWS
 
-* Buttons
+* Narrator
 
-* Navigation
-
-* Media
+* Orca
 
 * Other
 
@@ -570,9 +585,11 @@ Stores:
 
 * Application Version
 
-* Status
+* Verification Type
 
-* Updated Timestamp
+* Optional Screen Reader and Device Details
+
+* Created and Updated Timestamps
 
 
 
@@ -582,9 +599,11 @@ Rules:
 
 * One verification per user per bug.
 
-* A new verification replaces the user's previous verification.
+* A user can have one verification per bug.
 
-* Verification history is not preserved in Version 1.
+* A user's verification can be edited or deleted.
+
+* Verification actions are restricted to the verification creator, including when the user has the administrator role.
 
 
 
@@ -600,13 +619,15 @@ Instead of simple voting, users verify the current state of an issue.
 
 
 
-Possible states:
+Possible verification types:
 
 
 
-* Still Exists
+* Still Present
 
 * Fixed For Me
+
+* Not Present
 
 
 
@@ -617,6 +638,8 @@ Each verification contains:
 * Application Version
 
 * Timestamp
+
+* Optional Device and Screen Reader Details
 
 
 
@@ -652,7 +675,7 @@ Community Verification
 
 
 
-Still Exists
+Still Present
 
 
 
@@ -680,7 +703,7 @@ Version 3.6.0
 
 
 
-# 13. Planned MVP Features
+# 13. Implemented MVP Features
 
 
 
@@ -724,15 +747,23 @@ Version 3.6.0
 
 * View reports
 
+* View report details
+
+* Search and filter reports by supported metadata
+
 
 
 ## Community Verification
 
 
 
-* Still Exists
+* Still Present
 
 * Fixed For Me
+
+* Not Present
+
+* Edit and delete the authenticated user's verification
 
 
 
@@ -756,9 +787,7 @@ Reports
 
 * Search by application
 
-* Search by category
-
-* Search by verification status
+* Filter by platform, screen reader, and severity
 
 
 
@@ -766,11 +795,11 @@ Reports
 
 
 
-* Manage users
+* Backend ownership validation for bug mutations
 
-* Delete inappropriate reports
+* Administrator permission to edit or delete bugs
 
-* Delete applications
+* Administrator dashboard and user management are future scope
 
 
 
@@ -1024,11 +1053,11 @@ AccessTracker should evolve from a simple issue reporting platform into a collab
 
 
 
-This document describes Version 0.3 of AccessTracker.
+This document describes Version 0.4 of AccessTracker.
 
 
 
-The primary objective is to deliver a production-quality backend and a focused Flutter Web client during the internship. Backend implementation and API correctness take priority because the core product value is the quality and searchability of the accessibility issue data.
+The primary objective is to deliver a portfolio-ready MVP backend and a focused Flutter Web client. Backend implementation and API correctness take priority because the core product value is the quality and searchability of the accessibility issue data.
 
 
 
