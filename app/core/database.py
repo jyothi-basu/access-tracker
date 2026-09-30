@@ -2,8 +2,7 @@
 
 from functools import lru_cache
 
-from pymongo import MongoClient
-from pymongo import ASCENDING
+from pymongo import ASCENDING, DESCENDING, MongoClient
 from pymongo.database import Database
 
 from app.core.config import get_settings
@@ -21,6 +20,7 @@ def get_database() -> Database:
     settings = get_settings()
     return get_mongo_client()[settings.mongo_db_name]
 
+
 def init_database_indexes(db: Database) -> None:
     """Create MongoDB indexes required by AccessTracker."""
 
@@ -29,6 +29,8 @@ def init_database_indexes(db: Database) -> None:
     applications = db["applications"]
     bugs = db["bugs"]
     verifications = db["verifications"]
+    developer_applications = db["developer_applications"]
+    developer_responses = db["developer_responses"]
 
     # Authentication indexes
     users.create_index(
@@ -68,16 +70,67 @@ def init_database_indexes(db: Database) -> None:
     )
 
     # Bugs indexes
-
-    bugs.create_index([("application_id", ASCENDING)], name="ix_bugs_application_id")
-    bugs.create_index([("created_by", ASCENDING)], name="ix_bugs_created_by")
-    bugs.create_index([("platform", ASCENDING)], name="ix_bugs_platform")
-    bugs.create_index([("screen_reader", ASCENDING)], name="ix_bugs_screen_reader")
-    bugs.create_index([("created_at", -1)], name="ix_bugs_created_at")
-    bugs.create_index([("title", ASCENDING)], name="ix_bugs_title")
+    bugs.create_index(
+        [("application_id", ASCENDING)],
+        name="ix_bugs_application_id",
+    )
+    bugs.create_index(
+        [("created_by", ASCENDING)],
+        name="ix_bugs_created_by",
+    )
+    bugs.create_index(
+        [("platform", ASCENDING)],
+        name="ix_bugs_platform",
+    )
+    bugs.create_index(
+        [("screen_reader", ASCENDING)],
+        name="ix_bugs_screen_reader",
+    )
+    bugs.create_index(
+        [("created_at", DESCENDING)],
+        name="ix_bugs_created_at",
+    )
+    bugs.create_index(
+        [("title", ASCENDING)],
+        name="ix_bugs_title",
+    )
 
     # Verifications indexes
-    verifications.create_index([("bug_id", ASCENDING), ("user_id", ASCENDING)], unique=True, name="uq_verifications_bug_user")
-    verifications.create_index([("bug_id", ASCENDING)], name="ix_verifications_bug_id")
-    verifications.create_index([("user_id", ASCENDING)], name="ix_verifications_user_id")
-    verifications.create_index([("verification_type", ASCENDING)], name="ix_verifications_type")
+    verifications.create_index(
+        [("bug_id", ASCENDING), ("user_id", ASCENDING)],
+        unique=True,
+        name="uq_verifications_bug_user",
+    )
+    verifications.create_index(
+        [("bug_id", ASCENDING)],
+        name="ix_verifications_bug_id",
+    )
+    verifications.create_index(
+        [("user_id", ASCENDING)],
+        name="ix_verifications_user_id",
+    )
+    verifications.create_index(
+        [("verification_type", ASCENDING)],
+        name="ix_verifications_type",
+    )
+
+    # Developer applications indexes
+    developer_applications.create_index(
+        [("user_id", ASCENDING), ("application_id", ASCENDING)],
+        unique=True,
+        name="uq_developer_applications_user_application",
+    )
+    developer_applications.create_index(
+        [("user_id", ASCENDING), ("status", ASCENDING)],
+        name="ix_developer_applications_user_status",
+    )
+
+    # Developer responses indexes
+    developer_responses.create_index(
+        [("bug_id", ASCENDING), ("updated_at", DESCENDING)],
+        name="ix_developer_responses_bug_updated_at",
+    )
+    developer_responses.create_index(
+        [("developer_id", ASCENDING), ("updated_at", DESCENDING)],
+        name="ix_developer_responses_developer_updated_at",
+    )

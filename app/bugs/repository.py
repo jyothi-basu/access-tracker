@@ -23,6 +23,15 @@ class BugRepository:
         """Return a bug report by its ID."""
         return self.collection.find_one({"_id": bug_id})
 
+    def count_bugs_by_application(
+        self,
+        application_id: ObjectId,
+    ) -> int:
+        """Return the number of bug reports for an application."""
+        return self.collection.count_documents(
+            {"application_id": application_id}
+        )
+
     def search_bugs(
         self,
         search: str | None = None,
