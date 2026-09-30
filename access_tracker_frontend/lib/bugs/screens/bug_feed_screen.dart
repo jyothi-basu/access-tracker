@@ -10,8 +10,13 @@ import '../widgets/bug_card.dart';
 /// Displays searchable and filterable accessibility bug reports.
 class BugFeedScreen extends ConsumerStatefulWidget {
   final bool guestMode;
+  final String? applicationName;
 
-  const BugFeedScreen({super.key, this.guestMode = false});
+  const BugFeedScreen({
+    super.key,
+    this.guestMode = false,
+    this.applicationName,
+  });
 
   @override
   ConsumerState<BugFeedScreen> createState() => _BugFeedScreenState();
@@ -21,6 +26,20 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
   final _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.applicationName != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref
+              .read(bugFeedProvider.notifier)
+              .setApplicationName(widget.applicationName!);
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -28,6 +47,7 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
 
   Future<void> _showFilters(BugFeedState currentState) async {
     var platform = currentState.filters.platform;
+    final applicationName = currentState.filters.applicationName;
     var screenReader = currentState.filters.screenReader;
     var severity = currentState.filters.severity;
     var sortOrder = currentState.filters.sortOrder;
@@ -86,6 +106,7 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(
                           BugFeedFilters(
+                            applicationName: applicationName,
                             platform: platform,
                             screenReader: screenReader,
                             severity: severity,
@@ -96,7 +117,9 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
                       ),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(const BugFeedFilters()),
+                      onPressed: () => Navigator.of(context).pop(
+                        BugFeedFilters(applicationName: applicationName),
+                      ),
                       child: const Text('Clear Filters'),
                     ),
                   ],

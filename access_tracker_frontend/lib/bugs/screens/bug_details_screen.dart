@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/provider/auth_provider.dart';
+import '../../core/network/api_error_handler.dart';
 import '../../shared/widgets/error_banner.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../models/bug_models.dart';
@@ -11,6 +12,8 @@ import '../../verifications/providers/verification_provider.dart';
 import '../../verifications/models/verification_models.dart';
 import '../../verifications/widgets/verification_dialog.dart';
 import '../../verifications/widgets/delete_verification_dialog.dart';
+import '../../developers/providers/developer_provider.dart';
+import '../../developers/widgets/developer_response_dialog.dart';
 
 /// Displays one bug report and its read-only verification summary.
 class BugDetailsScreen extends ConsumerWidget {
@@ -58,19 +61,7 @@ class _BugDetailsBody extends ConsumerWidget {
           _ContentSection(title: 'Steps to Reproduce', content: bug.stepsToReproduce!),
         if (bug.deviceModel != null && bug.deviceModel!.isNotEmpty)
           _ContentSection(title: 'Device', content: bug.deviceModel!),
-        const Card(
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Developer Response', style: TextStyle(fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
-                Text('No developer response yet.'),
-              ],
-            ),
-          ),
-        ),
+        _DeveloperResponseActions(bug: bug),
         const SizedBox(height: 20),
         Text('Community Verification Summary', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 8),
@@ -86,6 +77,71 @@ class _BugDetailsBody extends ConsumerWidget {
         const SizedBox(height: 20),
         _BugOwnerActions(bug: bug),
       ],
+    );
+  }
+}
+
+class _DeveloperResponseActions extends ConsumerWidget {
+  final BugModel bug;
+
+  const _DeveloperResponseActions({required this.bug});
+
+  Future<void> _respond(BuildContext context, WidgetRef ref) async {
+    final created = await showDialog<bool>(
+      context: context,
+      builder: (_) => DeveloperResponseDialog(bugId: bug.id),
+    );
+    if (created != true || !context.mounted) return;
+
+    ref.invalidate(developerResponsesForBugProvider(bug.id));
+    ref.invalidate(developerMyResponsesProvider);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Developer response submitted successfully.')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authProvider).currentUser;
+    final isDeveloper = user?.role.toLowerCase() == 'developer';
+    final applicationsState = isDeveloper
+        ? ref.watch(developerApplicationsProvider)
+        : null;
+    final canRespond = applicationsState?.maybeWhen(
+          data: (applications) => applications.any(
+            (application) => application.applicationId == bug.applicationId,
+          ),
+          orElse: () => false,
+        ) ??
+        false;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Developer Responses',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          if (applicationsState?.hasError == true) ...[
+            ErrorBanner(error: ApiErrorHandler.handle(applicationsState!.error)),
+            const SizedBox(height: 8),
+          ],
+          ElevatedButton(
+            onPressed: () => context.push('/bugs/${bug.id}/developer-responses'),
+            child: const Text('View Developer Responses'),
+          ),
+          if (canRespond) ...[
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => _respond(context, ref),
+              child: const Text('Respond'),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

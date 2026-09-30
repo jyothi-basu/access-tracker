@@ -173,12 +173,14 @@ enum BugSortOrder { newest, oldest }
 /// Active server-side filters and client-side sort order for the feed.
 @immutable
 class BugFeedFilters {
+  final String? applicationName;
   final String? platform;
   final String? screenReader;
   final String? severity;
   final BugSortOrder sortOrder;
 
   const BugFeedFilters({
+    this.applicationName,
     this.platform,
     this.screenReader,
     this.severity,
@@ -186,15 +188,20 @@ class BugFeedFilters {
   });
 
   BugFeedFilters copyWith({
+    String? applicationName,
     String? platform,
     String? screenReader,
     String? severity,
     BugSortOrder? sortOrder,
     bool clearPlatform = false,
+    bool clearApplicationName = false,
     bool clearScreenReader = false,
     bool clearSeverity = false,
   }) {
     return BugFeedFilters(
+      applicationName: clearApplicationName
+          ? null
+          : (applicationName ?? this.applicationName),
       platform: clearPlatform ? null : (platform ?? this.platform),
       screenReader: clearScreenReader ? null : (screenReader ?? this.screenReader),
       severity: clearSeverity ? null : (severity ?? this.severity),

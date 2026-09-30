@@ -17,6 +17,8 @@ import '../../bugs/screens/my_bugs_screen.dart';
 import '../../verifications/screens/verifications_screen.dart';
 import '../../verifications/screens/my_verifications_screen.dart';
 import '../../bugs/models/bug_models.dart';
+import '../../developers/screens/developer_dashboard_screen.dart';
+import '../../developers/screens/developer_responses_screen.dart';
 
 class AuthRouterRefresh extends ChangeNotifier {
   AuthState? _authState;
@@ -47,6 +49,8 @@ final appRouter = GoRouter(
     final requiresAuthentication = state.uri.path == '/home' ||
         state.uri.path == '/my-bugs' ||
         state.uri.path == '/my-verifications' ||
+        state.uri.path == '/developer' ||
+        state.uri.path == '/developers/responses' ||
         state.uri.path.endsWith('/edit');
 
     if (requiresAuthentication && !authState.isAuthenticated) {
@@ -65,7 +69,10 @@ final appRouter = GoRouter(
       path: '/bugs',
       builder: (context, state) => Scaffold(
         appBar: AppBar(title: const Text('Bug Reports')),
-        body: BugFeedScreen(guestMode: true),
+        body: BugFeedScreen(
+          guestMode: true,
+          applicationName: state.uri.queryParameters['application_name'],
+        ),
       ),
     ),
     GoRoute(
@@ -119,6 +126,20 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/my-verifications',
       builder: (context, state) => const MyVerificationsScreen(),
+    ),
+    GoRoute(
+      path: '/developer',
+      builder: (context, state) => const DeveloperDashboardScreen(),
+    ),
+    GoRoute(
+      path: '/developers/responses',
+      builder: (context, state) => const MyDeveloperResponsesScreen(),
+    ),
+    GoRoute(
+      path: '/bugs/:bugId/developer-responses',
+      builder: (context, state) => DeveloperResponsesForBugScreen(
+        bugId: state.pathParameters['bugId']!,
+      ),
     ),
   ],
 );

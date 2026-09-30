@@ -170,7 +170,7 @@ class BugService:
 
         bug_document = self._build_bug_document(
             payload=payload,
-            application_id=application.id,
+            application_id=ObjectId(application.id),
             created_by=current_user_id,
         )
 
