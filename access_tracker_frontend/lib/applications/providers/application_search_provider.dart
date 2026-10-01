@@ -8,6 +8,11 @@ final applicationServiceProvider = Provider<ApplicationService>((ref) {
   return ApplicationService(ref.watch(apiClientProvider));
 });
 
+/// Provides the applications available in the bug-feed filter.
+final applicationListProvider = FutureProvider.autoDispose<List<ApplicationModel>>((ref) {
+  return ref.watch(applicationServiceProvider).fetchAllApplications();
+});
+
 class ApplicationSearchState {
   final String query;
   final List<ApplicationModel> results;

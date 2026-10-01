@@ -58,6 +58,7 @@ class BugFeedNotifier extends StateNotifier<BugFeedState> {
     try {
       final bugs = await _service.fetchBugs(
         search: state.search,
+        applicationId: state.filters.applicationId,
         applicationName: state.filters.applicationName,
         platform: state.filters.platform,
         screenReader: state.filters.screenReader,
@@ -90,10 +91,10 @@ class BugFeedNotifier extends StateNotifier<BugFeedState> {
     await fetchBugs();
   }
 
-  Future<void> setApplicationName(String applicationName) async {
-    if (state.filters.applicationName == applicationName) return;
+  Future<void> setApplicationId(String applicationId) async {
+    if (state.filters.applicationId == applicationId) return;
     await setFilters(
-      state.filters.copyWith(applicationName: applicationName),
+      state.filters.copyWith(applicationId: applicationId),
     );
   }
 }

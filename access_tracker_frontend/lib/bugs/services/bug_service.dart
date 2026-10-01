@@ -10,6 +10,7 @@ class BugService {
   /// Fetches bug reports using the backend's supported query filters.
   Future<List<BugModel>> fetchBugs({
     String? search,
+    String? applicationId,
     String? applicationName,
     String? platform,
     String? screenReader,
@@ -17,6 +18,8 @@ class BugService {
   }) async {
     final queryParameters = <String, dynamic>{
       if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      if (applicationId != null && applicationId.trim().isNotEmpty)
+        'application_id': applicationId.trim(),
       if (applicationName != null && applicationName.trim().isNotEmpty)
         'application_name': applicationName.trim(),
       if (platform != null) 'platform': platform,

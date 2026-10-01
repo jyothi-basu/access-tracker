@@ -5,6 +5,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+from app.applications.schemas import Platform
+
 
 class DeveloperApplicationStatus(str, Enum):
     PENDING = "pending"
@@ -34,4 +36,5 @@ class DeveloperResponse(BaseModel):
 class DeveloperApplicationSummary(BaseModel):
     application_id: str
     application_name: str
+    platform: Platform
     bug_count: int

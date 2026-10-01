@@ -24,6 +24,11 @@ class ApplicationService {
       throw ApplicationServiceException(ApiErrorHandler.handle(error));
     }
   }
+
+  /// Loads all applications for application-based bug filtering.
+  Future<List<ApplicationModel>> fetchAllApplications() {
+    return searchApplications('');
+  }
 }
 
 /// User-facing error raised when application search cannot be completed.

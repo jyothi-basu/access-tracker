@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../applications/models/application_model.dart';
+import '../../applications/providers/application_search_provider.dart';
 import '../../shared/widgets/error_banner.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../models/bug_models.dart';
@@ -10,12 +12,12 @@ import '../widgets/bug_card.dart';
 /// Displays searchable and filterable accessibility bug reports.
 class BugFeedScreen extends ConsumerStatefulWidget {
   final bool guestMode;
-  final String? applicationName;
+  final String? applicationId;
 
   const BugFeedScreen({
     super.key,
     this.guestMode = false,
-    this.applicationName,
+    this.applicationId,
   });
 
   @override
@@ -28,12 +30,12 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.applicationName != null) {
+    if (widget.applicationId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           ref
               .read(bugFeedProvider.notifier)
-              .setApplicationName(widget.applicationName!);
+              .setApplicationId(widget.applicationId!);
         }
       });
     }
@@ -47,7 +49,7 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
 
   Future<void> _showFilters(BugFeedState currentState) async {
     var platform = currentState.filters.platform;
-    final applicationName = currentState.filters.applicationName;
+    var applicationId = currentState.filters.applicationId;
     var screenReader = currentState.filters.screenReader;
     var severity = currentState.filters.severity;
     var sortOrder = currentState.filters.sortOrder;
@@ -66,6 +68,43 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
                   children: [
                     Text('Filter Bug Reports', style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 16),
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final applicationState = ref.watch(applicationListProvider);
+                        return applicationState.when(
+                          loading: () => const LoadingIndicator(),
+                          error: (error, stackTrace) => ErrorBanner(error: error.toString()),
+                          data: (applications) {
+                            final selectedApplicationId = applications.any(
+                              (application) => application.id == applicationId,
+                            )
+                                ? applicationId
+                                : null;
+
+                            return DropdownButtonFormField<String>(
+                              value: selectedApplicationId ?? '',
+                              decoration: const InputDecoration(labelText: 'Application'),
+                              items: [
+                                const DropdownMenuItem(
+                                  value: '',
+                                  child: Text('All applications'),
+                                ),
+                                ...applications.map(
+                                  (application) => DropdownMenuItem(
+                                    value: application.id,
+                                    child: Text(_applicationLabel(application)),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (value) => setSheetState(
+                                () => applicationId = value == null || value.isEmpty ? null : value,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       value: platform,
                       decoration: const InputDecoration(labelText: 'Platform'),
@@ -106,7 +145,7 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(
                           BugFeedFilters(
-                            applicationName: applicationName,
+                            applicationId: applicationId,
                             platform: platform,
                             screenReader: screenReader,
                             severity: severity,
@@ -118,7 +157,7 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(
-                        BugFeedFilters(applicationName: applicationName),
+                        BugFeedFilters(applicationId: applicationId),
                       ),
                       child: const Text('Clear Filters'),
                     ),
@@ -200,6 +239,14 @@ class _BugFeedScreenState extends ConsumerState<BugFeedScreen> {
     return values.entries
         .map((entry) => DropdownMenuItem(value: entry.key, child: Text(entry.value)))
         .toList();
+  }
+
+  static String _applicationLabel(ApplicationModel application) {
+    final platform = application.platform;
+    if (platform == null || platform.isEmpty) {
+      return application.displayName;
+    }
+    return '${application.displayName} - ${platform[0].toUpperCase()}${platform.substring(1)}';
   }
 }
 

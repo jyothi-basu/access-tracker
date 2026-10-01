@@ -4,11 +4,13 @@ import '../../core/utils/date_time_utils.dart';
 class DeveloperApplicationSummary {
   final String applicationId;
   final String applicationName;
+  final String platform;
   final int bugCount;
 
   const DeveloperApplicationSummary({
     required this.applicationId,
     required this.applicationName,
+    required this.platform,
     required this.bugCount,
   });
 
@@ -16,6 +18,7 @@ class DeveloperApplicationSummary {
     return DeveloperApplicationSummary(
       applicationId: _value(json['application_id']),
       applicationName: _value(json['application_name']),
+      platform: _value(json['platform']),
       bugCount: (json['bug_count'] as num?)?.toInt() ?? 0,
     );
   }

@@ -71,7 +71,7 @@ final appRouter = GoRouter(
         appBar: AppBar(title: const Text('Bug Reports')),
         body: BugFeedScreen(
           guestMode: true,
-          applicationName: state.uri.queryParameters['application_name'],
+          applicationId: state.uri.queryParameters['application_id'],
         ),
       ),
     ),

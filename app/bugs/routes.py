@@ -49,6 +49,7 @@ def create_bug(
 @router.get("", response_model=BugListResponse)
 def search_bugs(
     search: str | None = Query(default=None),
+    application_id: str | None = Query(default=None),
     application_name: str | None = Query(default=None),
     platform: str | None = Query(default=None),
     screen_reader: str | None = Query(default=None),
@@ -58,6 +59,7 @@ def search_bugs(
     """Browse and search accessibility bug reports."""
     return service.search_bugs(
         search=search,
+        application_id=application_id,
         application_name=application_name,
         platform=platform,
         screen_reader=screen_reader,

@@ -112,7 +112,7 @@ class DeveloperDashboardScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          application.applicationName,
+                          '${application.applicationName} - ${_platformLabel(application.platform)}',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 8),
@@ -123,7 +123,7 @@ class DeveloperDashboardScreen extends ConsumerWidget {
                             final uri = Uri(
                               path: '/bugs',
                               queryParameters: {
-                                'application_name': application.applicationName,
+                                'application_id': application.applicationId,
                               },
                             );
                             context.push(uri.toString());
@@ -155,6 +155,11 @@ class DeveloperDashboardScreen extends ConsumerWidget {
         );
       },
     );
+  }
+
+  String _platformLabel(String value) {
+    if (value.isEmpty) return 'Unknown platform';
+    return '${value[0].toUpperCase()}${value.substring(1)}';
   }
 }
 

@@ -183,6 +183,7 @@ class BugService:
     def search_bugs(
         self,
         search: str | None = None,
+        application_id: str | None = None,
         application_name: str | None = None,
         platform: str | None = None,
         screen_reader: str | None = None,
@@ -190,9 +191,15 @@ class BugService:
     ) -> BugListResponse:
         """Search accessibility bug reports."""
 
-        application_id = None
-
-        if application_name:
+        if application_id:
+            try:
+                application_id = ObjectId(application_id)
+            except InvalidId as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid application ID.",
+                ) from exc
+        elif application_name:
             applications = self.application_service.search_applications(
                 application_name
             )
@@ -200,7 +207,13 @@ class BugService:
             if not applications:
                 return BugListResponse(bugs=[])
 
-            application_id = applications[0].id
+            try:
+                application_id = ObjectId(applications[0].id)
+            except InvalidId as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid application ID.",
+                ) from exc
 
         bugs = self.repository.search_bugs(
             search=search,

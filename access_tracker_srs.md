@@ -1,1064 +1,326 @@
-# Software Requirements Specification (SRS)
+# AccessTracker Software Requirements Specification
 
-# Project Name
-**AccessTracker**
-**Version:** 0.4 (Implemented Backend-First MVP)
+**Version:** 1.0 MVP
+**Status:** Implemented and locked for presentation
 **Author:** Jyothi Basu
 
----
+## 1. Purpose
 
-# 1. Project Overview
-AccessTracker is a community-driven platform that enables users to report, discover, and track accessibility issues in software applications.
+AccessTracker is a community-driven platform for reporting, discovering, and verifying accessibility issues in software applications.
 
-The platform aims to provide a centralized knowledge base specifically for accessibility-related issues instead of mixing them with general bug reports found in application stores.
+The MVP provides a focused accessibility knowledge base instead of mixing accessibility issues into general application reviews. It is implemented as a FastAPI backend with a Flutter Web client.
 
-The first version focuses on delivering a complete Minimum Viable Product (MVP) through a backend-first approach. The initial client is Flutter Web because the primary use cases are browsing accessibility reports and posting issues. Mobile and desktop executables are intentionally deferred until there is a demonstrated product need.
+## 2. Problem Statement
 
-The architecture remains extensible for future client applications, developer collaboration, notifications, analytics, and additional features.
+Accessibility issues are difficult to discover in general application reviews because they are mixed with unrelated feedback and often lack structured technical context. Users need to know about accessibility issues before relying on an application. Developers need structured reports that can be searched, reproduced, and answered.
 
----
+AccessTracker addresses this problem with structured reports containing application, platform, version, screen reader, severity, behavior, reproduction, and device information.
 
-# 2. Problem Statement
+## 3. Objectives
 
-Current application stores such as Google Play and Microsoft Store allow users to report problems through reviews. However:
-* Accessibility issues are mixed with thousands of unrelated reviews.
-* Users cannot easily determine whether an application is accessible before installing it.
-* Accessibility issues are difficult for developers to discover and prioritize.
-* There is no centralized accessibility knowledge base across applications.
-AccessTracker attempts to solve this problem by focusing exclusively on accessibility.
+- Allow guests to browse accessibility bug reports.
+- Allow registered users to create and manage their own bug reports.
+- Allow the community to record environment-specific verification results.
+- Provide secure authentication and account recovery.
+- Allow approved developers to respond to bugs belonging to their applications.
+- Demonstrate maintainable, feature-based backend architecture.
 
----
+## 4. Target Users and Permissions
 
-# 3. Objectives
+### Guest
 
-* Allow users to report accessibility issues.
-* Allow users to search accessibility reports before installing an application.
-* Allow community members to verify whether issues still exist.
-* Preserve accessibility knowledge across application versions.
-* Build a scalable architecture that supports future expansion.
+Guests can:
 
----
+- Browse and search bug reports.
+- View bug details.
+- View community verifications.
+- View developer responses.
 
-# 4. Target Users
+Guests cannot create bugs, submit verifications, or submit developer responses.
 
-## Guest
-Can:
+### Registered User
 
+Registered users can:
 
+- Register and verify their email.
+- Log in and recover their password.
+- Create, edit, and delete their own bugs.
+- Submit, edit, and delete their own verifications.
+- Browse and search applications and bug reports.
 
-* Browse applications.
+### Administrator
 
-* Browse accessibility reports.
+Administrators can edit and delete bug reports through backend RBAC. An administrator dashboard and broader moderation tools are deferred.
 
-* View community verifications.
+Administrators do not receive ownership permissions for other users' verifications or developer responses.
 
-* Search applications.
+### Developer
 
-* Search reports.
+A developer must satisfy both conditions:
 
+1. The authenticated user's `users.role` is `developer`.
+2. An approved `developer_applications` relationship exists for the bug's application.
 
+Developers can:
 
-Cannot:
+- View approved application summaries and bug counts.
+- View all responses they created.
+- Respond to bugs belonging to approved applications.
+- Edit and delete only their own developer responses.
 
+Multiple developers may represent one application, and one developer may represent multiple applications. Multiple developers may respond to the same bug.
 
+## 5. Technology Stack
 
-* Report issues.
+### Backend
 
-* Submit verifications.
+- Python
+- FastAPI
+- Pydantic
+- Synchronous PyMongo
+- MongoDB
+- Redis
+- Argon2
+- PyJWT
+- Resend
 
+### Frontend
 
+- Flutter Web
+- Riverpod
+- Dio
+- GoRouter
+- Flutter Secure Storage
+- Flutter Dotenv
 
----
+The MVP targets browser use. Native Android, iOS, Windows, macOS, and Linux clients are deferred.
 
+## 6. Functional Requirements
 
+### Authentication
 
-## Registered User
+- Registration requires username, email, and password.
+- Registration requires email OTP verification before the user is persisted.
+- Passwords are hashed with Argon2.
+- Login returns a 30-minute access token and a seven-day refresh token.
+- Refresh sessions store refresh-token hashes in MongoDB.
+- Refresh tokens are rotated.
+- Logout revokes the refresh session.
+- Password reset uses email OTP verification.
 
+### Applications
 
+- Applications have a display name and platform.
+- Applications are uniquely identified by normalized display name and platform.
+- The same display name may exist for different platforms.
+- Application IDs are used internally for exact relationships and filtering.
 
-Can:
+### Bug Reports
 
+Bug reports contain:
 
+- Application ID.
+- Platform.
+- Application version.
+- Title.
+- Severity.
+- Screen reader.
+- Actual behavior.
+- Expected behavior.
+- Optional reproduction steps.
+- Optional screen reader version.
+- Optional device model.
+- Creator ID.
+- Created and updated timestamps.
 
-* Register.
+Users can search and filter reports by supported metadata. Bug application filtering uses the exact application ID when supplied; the user-facing UI displays application names and platforms.
 
-* Login.
+### Community Verifications
 
-* Report accessibility issues.
+Verification types are:
 
-* Edit/Delete own reports.
+- Still present.
+- Fixed for me.
+- Not present.
 
-* Submit community verifications.
+Each user can have at most one verification per bug. Only the verification owner may edit or delete it, including when the owner is an administrator.
 
-* Search applications.
+Community verification is an environment-specific observation. It is not an official determination that a bug is fixed.
 
-* Search reports.
+### Developer Responses
 
+Developer responses contain:
 
+- Bug ID.
+- Application ID derived from the bug.
+- Developer ID derived from authentication.
+- Response text.
+- Created and updated timestamps.
 
----
+The API resolves the developer username for responses. The client must not provide developer ID, application ID, or bug ID in the request body.
 
+Response endpoints are owned by the Developers feature:
 
+```text
+GET    /api/v1/developers/applications
+GET    /api/v1/developers/responses
+GET    /api/v1/developers/bugs/{bug_id}/responses
+POST   /api/v1/developers/bugs/{bug_id}/responses
+PATCH  /api/v1/developers/responses/{response_id}
+DELETE /api/v1/developers/responses/{response_id}
+```
 
-## Administrator
+## 7. Non-Functional Requirements
 
+- Backend features follow Routes -> Services -> Repositories -> MongoDB.
+- Authentication and authorization decisions are enforced by the backend.
+- API errors should be returned with clear HTTP status codes and messages.
+- Flutter screens use service and provider layers rather than direct HTTP calls.
+- Primary interactions should remain keyboard and screen-reader accessible.
+- Bug and verification cards use readable vertical layouts with explicit labels.
+- The system should preserve platform-specific application identity.
 
+## 8. Architecture
 
-Can:
-
-
-
-* Edit or delete bug reports through backend RBAC.
-
-* Perform future moderation and management operations when the admin dashboard is implemented.
-
-The current MVP does not include an administrator dashboard, user management UI, application management UI, or special administrator permissions for editing other users' verifications.
-
-
-
----
-
-
-
-# 5. Planned Roles
-
-
-
-## Developer (Future Version)
-
-
-
-The developer role exists in the system design but is **not implemented in Version 1**.
-
-
-
-Future responsibilities include:
-
-
-
-* Claim applications.
-
-* Respond to reports.
-
-* Update issue status.
-
-* Publish accessibility fixes.
-
-
-
----
-
-
-
-# 6. Technology Stack
-
-
-
-## Backend
-
-
-
-* Python
-
-* FastAPI
-
-* Pydantic
-
-* PyMongo
-
-
-
-## Database
-
-
-
-* MongoDB
-
-
-
-## Temporary Data and Caching
-
-
-
-* Redis for temporary registration and password-reset OTP data
-
-## Email Delivery
-
-* Resend for verification and account-recovery emails
-
-
-
-## Security
-
-
-
-* Argon2id Password Hashing
-
-* JWT Authentication
-
-* Access Token (30 minutes)
-
-* Refresh Token (7 days)
-
-* Purpose-specific OTP hashing and expiry limits
-
-
-
-## Frontend
-
-
-
-* Flutter Web
-
-The initial release targets browser-based use only. Android, iOS, Windows, macOS, and Linux clients are not part of the MVP.
-
-
-
----
-
-
-
-# 7. Project Scope
-
-
-
-## Included in MVP
-
-
-
-* JWT Authentication
-
-* Refresh Tokens
-
-* Email OTP verification during registration
-
-* Password reset through email OTP
-
-* Guest, registered user, and limited administrator permissions
-
-* Applications
-
-* Accessibility Reports
-
-* Community Verification
-
-* Search
-
-* My Bugs and My Verifications profile views
-
-* Owner edit and delete actions
-
-* Backend RBAC for administrator bug actions
-
-
-
-## Excluded from MVP
-
-
-
-* Developer workflow
-
-* Google Sign-In
-
-* Push notifications
-
-* File uploads
-
-* Accessibility score
-
-* Administrator dashboard and user management UI
-
-* Developer dashboard and developer workflow
-
-* Comments and discussions
-
-* Native mobile applications
-
-* Native desktop applications
-
-
-
----
-
-
-
-# 8. Proposed Architecture
-
-
-
+```text
 Flutter Web
+    |
+    v
+FastAPI routes
+    |
+    v
+Feature services
+    |
+    v
+Feature repositories
+    |
+    v
+MongoDB / Redis
+```
 
-
-
-↓
-
-
-
-FastAPI
-
-
-
-↓
-
-
-
-Feature Modules
-
-
-
-↓
-
-
-
-Repository Layer
-
-
-
-↓
-
-
-
-MongoDB
-
-
-
----
-
-
-
-# 9. Backend Structure
-
-
+### Backend Structure
 
 ```text
-
 app/
-
-
-
-&#x20;   auth/
-
-&#x20;       routes.py
-
-&#x20;       service.py
-
-&#x20;       repository.py
-
-&#x20;       schemas.py
-
-&#x20;       otp_service.py
-
-&#x20;       email_service.py
-
-&#x20;   applications/
-
-&#x20;   bugs/
-
-&#x20;   verifications/
-
-
-
-
-&#x20;   core/
-
-&#x20;       config.py
-
-&#x20;       database.py
-
-&#x20;       redis.py
-
-&#x20;       dependencies.py
-
-&#x20;       security.py
-
-
-
-&#x20;   utils/
-
-
-
-&#x20;   main.py
-
+├── auth/
+├── applications/
+├── bugs/
+├── developers/
+├── verifications/
+├── core/
+└── utils/
 ```
 
-
-
----
-
-
-
-# 10. Frontend Structure
-
-
+### Frontend Structure
 
 ```text
-
-access_tracker_frontend/
-
-
-
-&#x20;   lib/
-
-
-
-&#x20;       auth/
-
-&#x20;       applications/
-
-&#x20;       bugs/
-
-&#x20;       verifications/
-
-&#x20;       home/
-
-&#x20;       core/
-
-&#x20;       shared/
-
-
-
-&#x20;   web/
-
-
-
-&#x20;   pubspec.yaml
-
+access_tracker_frontend/lib/
+├── auth/
+├── applications/
+├── bugs/
+├── developers/
+├── verifications/
+├── home/
+├── core/
+└── shared/
 ```
 
+## 9. Data Collections
 
+### users
 
----
+Stores username, email, Argon2 password hash, role, email verification state, and account timestamps.
 
+Roles are `user`, `developer`, and `admin`.
 
+### applications
 
-# 11. Collections
+Stores display name, normalized name, platform, ownership metadata, and timestamps. Normalized name and platform are unique together.
 
+### bugs
 
+Stores structured accessibility bug reports. `application_id` is stored as a MongoDB `ObjectId`.
 
-## Users
+### verifications
 
+Stores one user verification per bug, including verification type, application version, optional device information, and timestamps.
 
+### developer_applications
 
-Stores:
+Represents the application-specific relationship between a user and an application:
 
+```text
+user X is an approved developer for application Y
+```
 
+Fields include user ID, application ID, status, and timestamps. Status values are `pending`, `approved`, and `rejected`.
 
-* User information
+The MVP does not implement application submission or approval workflows. Approved records are manually inserted for demonstration and testing.
 
-* Authentication
+### developer_responses
 
-* Roles
+Stores separate developer response documents. There is intentionally no unique index on `bug_id`, allowing multiple developers to respond to one bug.
 
-The implemented user identity fields are `username`, `email`, and an Argon2 password hash. Email verification state and account timestamps are also stored.
+Response queries are ordered by `updated_at` descending.
 
+## 10. Security Requirements
 
+- Never store plaintext passwords.
+- Never store plaintext refresh tokens.
+- Require access authentication for protected operations.
+- Enforce bug ownership and administrator permissions in the backend.
+- Enforce verification ownership in the backend.
+- Require both developer role and approved application relationship before response creation.
+- Enforce response ownership for edit and delete operations.
+- Do not trust client-supplied developer or application identity fields.
 
-Roles:
+## 11. MVP Scope Status
 
+Implemented:
 
+- Authentication and email OTP flows.
+- Applications and application picker.
+- Bug creation, browsing, details, editing, and deletion.
+- Community verification CRUD and summaries.
+- My Bugs and My Verifications.
+- Developer dashboard and developer response CRUD.
+- Platform-specific application IDs and exact bug filtering.
+- Flutter Web application shell and protected navigation.
 
-* User
+Deferred:
 
-* Developer (Reserved for future implementation)
+- Developer application submission form.
+- Admin approval/rejection UI and workflow.
+- Evidence for developer verification.
+- Admin dashboard and user management.
+- Comments and discussions.
+- Notifications.
+- Analytics and moderation tooling.
+- Formal bug lifecycle statuses.
+- Response version history and soft deletion.
+- Pagination and advanced performance work.
+- Native mobile and desktop clients.
 
-* Admin
+## 12. Verification and Deployment Notes
 
+Backend local startup:
 
+```bash
+uvicorn app.main:app --reload
+```
 
----
+Backend syntax check:
 
+```bash
+python -m compileall -q app
+```
 
+Frontend checks require a working Flutter SDK:
 
-## Applications
+```bash
+cd access_tracker_frontend
+flutter analyze
+flutter test
+```
 
-
-
-Stores:
-
-
-
-* Display Name
-
-* Platform
-
-
-
-Applications are uniquely identified by:
-
-
-
-* Normalized Display Name
-
-* Platform
-
-
-
-The platform field is retained because the same application may have different accessibility behavior across platforms. The MVP client is web-based, but reports may describe web, Android, iOS, Windows, macOS, or Linux applications.
-
-
-
----
-
-
-
-## Bugs
-
-
-
-Stores:
-
-
-
-* Title
-
-* Actual Behavior
-
-* Expected Behavior
-
-* Optional Steps to Reproduce
-
-* Application ID
-
-* Creator User ID
-
-* Application Version
-
-* Screen Reader
-
-* Severity
-
-* Optional Device Model
-
-* Created and Updated Timestamps
-
-
-
-### Screen Readers
-
-
-
-* NVDA
-
-* TalkBack
-
-* VoiceOver
-
-* JAWS
-
-* Narrator
-
-* Orca
-
-* Other
-
-
-
-### Severity
-
-
-
-* Low
-
-* Medium
-
-* High
-
-* Critical
-
-
-
----
-
-
-
-## Verifications
-
-
-
-Stores:
-
-
-
-* Bug ID
-
-* User ID
-
-* Application Version
-
-* Verification Type
-
-* Optional Screen Reader and Device Details
-
-* Created and Updated Timestamps
-
-
-
-Rules:
-
-
-
-* One verification per user per bug.
-
-* A user can have one verification per bug.
-
-* A user's verification can be edited or deleted.
-
-* Verification actions are restricted to the verification creator, including when the user has the administrator role.
-
-
-
----
-
-
-
-# 12. Community Verification
-
-
-
-Instead of simple voting, users verify the current state of an issue.
-
-
-
-Possible verification types:
-
-
-
-* Still Present
-
-* Fixed For Me
-
-* Not Present
-
-
-
-Each verification contains:
-
-
-
-* Application Version
-
-* Timestamp
-
-* Optional Device and Screen Reader Details
-
-
-
-Example:
-
-
-
-Issue:
-
-
-
-TalkBack cannot activate the "Send Money" button.
-
-
-
-Reported:
-
-
-
-6 months ago
-
-
-
-Application Version:
-
-
-
-3.4.0
-
-
-
-Community Verification
-
-
-
-Still Present
-
-
-
-Latest confirmation:
-
-2 days ago
-
-Version 3.6.1
-
-
-
-Fixed For Me
-
-
-
-Latest confirmation:
-
-3 weeks ago
-
-Version 3.6.0
-
-
-
----
-
-
-
-# 13. Implemented MVP Features
-
-
-
-## Authentication
-
-
-
-* Register
-
-* Email OTP verification
-
-* Login
-
-* JWT Authentication
-
-* Refresh Token
-
-* Password reset through email OTP
-
-
-
-## Applications
-
-
-
-* Browse applications
-
-* Search applications
-
-
-
-## Accessibility Reports
-
-
-
-* Create report
-
-* Edit own report
-
-* Delete own report
-
-* View reports
-
-* View report details
-
-* Search and filter reports by supported metadata
-
-
-
-## Community Verification
-
-
-
-* Still Present
-
-* Fixed For Me
-
-* Not Present
-
-* Edit and delete the authenticated user's verification
-
-
-
-## Search
-
-
-
-Applications
-
-
-
-* Search by application name
-
-
-
-Reports
-
-
-
-* Search by title
-
-* Search by application
-
-* Filter by platform, screen reader, and severity
-
-
-
-## Administration
-
-
-
-* Backend ownership validation for bug mutations
-
-* Administrator permission to edit or delete bugs
-
-* Administrator dashboard and user management are future scope
-
-
-
----
-
-
-
-# 14. Planned Features (Architecture Exists)
-
-
-
-* Developer Role
-
-* Developer Verification
-
-* Developer Dashboard
-
-* Claim Application
-
-* Developer Issue Workflow
-
-
-
----
-
-
-
-# 15. Future Enhancements
-
-
-
-* Google Sign-In
-
-* Notifications
-
-* Accessibility Score
-
-* Workarounds
-
-* Analytics Dashboard
-
-* Release Notes
-
-* Docker Deployment
-
-* File Uploads
-
-* Native mobile clients
-
-* Native desktop clients
-
-
-
----
-
-
-
-# 16. Authentication Design
-
-
-
-## Password Hashing
-
-
-
-* Argon2id
-
-Passwords are hashed before being stored in Redis or MongoDB. Plain-text passwords are never persisted.
-
-
-
-## Authentication
-
-
-
-* JWT
-
-
-
-## Access Token
-
-
-
-* Valid for 30 minutes.
-
-
-
-## Refresh Token
-
-
-
-* Valid for 7 days.
-
-Refresh-token hashes are stored in the Sessions collection. Refresh tokens are rotated when used and can be revoked per session or for all sessions belonging to a user.
-
-## Email Verification
-
-Registration is a two-step process:
-
-1. The backend stores the pending registration and Argon2 password hash in Redis with a short expiry.
-2. Resend delivers a six-digit OTP to the submitted email address.
-3. The user submits the OTP.
-4. The backend creates the verified user in MongoDB.
-5. The user calls Login to receive access and refresh tokens.
-
-The registration verification endpoint does not issue JWT tokens.
-
-OTP values are hashed before storage, are purpose-specific, expire automatically, and have resend and failed-attempt limits.
-
-## Password Recovery
-
-Password recovery uses a separate Redis OTP namespace and follows this flow:
-
-1. The user requests a password-reset OTP using an email address.
-2. Resend delivers the OTP when the account is eligible.
-3. The user verifies the OTP and receives a short-lived, single-use reset grant.
-4. The user submits a new password with the reset grant.
-5. The backend updates the Argon2 password hash and revokes existing refresh sessions.
-
-Password-reset requests return a generic response so that account existence is not disclosed.
-
-
-
-## Password Policy
-
-
-
-Minimum requirements:
-
-
-
-* Minimum 8 characters
-
-* Maximum 128 characters
-
-
-
----
-
-
-
-# 17. Design Decisions
-
-
-
-## Why MongoDB?
-
-
-
-Accessibility reports contain flexible information that may vary between applications.
-
-
-
-MongoDB allows flexible document structures without rigid relational schemas.
-
-
-
----
-
-
-
-## Why Community Verification?
-
-
-
-Accessibility issues may be fixed without developers joining the platform.
-
-
-
-Community verification keeps reports useful by recording:
-
-
-
-* Application version
-
-* User observations
-
-* Verification timestamp
-
-
-
-instead of relying solely on developer updates.
-
-
-
----
-
-
-
-## Why No Comments?
-
-
-
-Comments were intentionally excluded from Version 1 to reduce complexity and ensure completion within the internship timeline.
-
-
-
-Community verification provides sufficient information for the MVP.
-
-
-
-Threaded discussions may be introduced in future versions if needed.
-
-
-
----
-
-
-
-## Why Not Only Google Play Reviews?
-
-
-
-General application stores mix accessibility reports with thousands of unrelated reviews.
-
-
-
-AccessTracker focuses exclusively on accessibility, creating a searchable knowledge base dedicated to accessibility issues.
-
-
-
----
-
-
-
-# 18. Long-Term Vision
-
-
-
-AccessTracker should evolve from a simple issue reporting platform into a collaborative accessibility platform where:
-
-
-
-* Users report issues.
-
-* Community members verify issues.
-
-* Developers collaborate directly with users.
-
-* Accessibility knowledge is preserved across application versions.
-
-* Applications gradually improve through community feedback.
-
-
-
----
-
-
-
-# 19. Current Scope
-
-
-
-This document describes Version 0.4 of AccessTracker.
-
-
-
-The primary objective is to deliver a portfolio-ready MVP backend and a focused Flutter Web client. Backend implementation and API correctness take priority because the core product value is the quality and searchability of the accessibility issue data.
-
-
-
-Several planned features—including developer workflows, notifications, analytics, file uploads, and native mobile or desktop clients—have been intentionally deferred. The architecture has been designed so these features can be introduced later without major restructuring.
+The MVP is intended for local demonstration and portfolio review. Production deployment would require environment-specific secrets, HTTPS, secure browser token handling, email-domain configuration, monitoring, automated tests, and operational hardening.

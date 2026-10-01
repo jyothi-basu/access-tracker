@@ -164,6 +164,7 @@ class DeveloperService:
                 {
                     "application_id": str(application_id),
                     "application_name": application.display_name,
+                    "platform": application.platform,
                     "bug_count": bug_count,
                 }
             )
